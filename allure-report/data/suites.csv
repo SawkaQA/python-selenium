@@ -1,0 +1,5 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Sat Apr 12 20:43:17 GMT 2025","Sat Apr 12 20:43:18 GMT 2025","1311","tests.api","test_reqres_enpoints","TestReqResEndpoints","","","test_create_pet",""
+"skipped","Sat Apr 12 20:43:17 GMT 2025","Sat Apr 12 20:43:17 GMT 2025","0","tests.api","test_reqres_enpoints","TestReqResEndpoints","","","test_create_user",""
+"passed","Sat Apr 12 20:43:18 GMT 2025","Sat Apr 12 20:43:19 GMT 2025","472","tests.api","test_reqres_enpoints","TestReqResEndpoints","","","test_delete_pet",""
+"broken","Sat Apr 12 20:43:19 GMT 2025","Sat Apr 12 20:43:19 GMT 2025","0","tests.ui","test_products_page","TestProductsPage","","","test_open",""

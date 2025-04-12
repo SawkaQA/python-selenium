@@ -1,12 +1,13 @@
 version: '3.8'
 
 services:
-  regression:
-    image: python:3.12.0a4-alpine3.17
-    build:
-      context: .
-      dockerfile: Dockerfile
+  tests:
+    build: .
     volumes:
-      - ./:/usr/workspace
-    command: /bin/sh -c "ls -la && pytest -sv --alluredir=allure-results"
+      - ./:/usr/workspace  # Монтируем весь проект
+      - ./allure-results:/usr/workspace/allure-results
+      - ./allure-report:/usr/workspace/allure-report
     working_dir: /usr/workspace
+    command: >
+      sh -c "pytest tests/ --alluredir=allure-results;
+             allure generate allure-results --clean -o allure-report"

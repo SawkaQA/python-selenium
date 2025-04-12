@@ -1,0 +1,80 @@
+{
+  "71e25e8b4297c03eb2700b9d4149e8c1" : {
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 1,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    },
+    "items" : [ {
+      "uid" : "ab33e1840d82ff6",
+      "status" : "skipped",
+      "statusDetails" : "Skipped: flaky",
+      "time" : {
+        "start" : 1744490597166,
+        "stop" : 1744490597166,
+        "duration" : 0
+      }
+    } ]
+  },
+  "4cdebf693429381d9fbb925649b87a45" : {
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 1,
+      "unknown" : 0,
+      "total" : 1
+    },
+    "items" : [ {
+      "uid" : "e72445be2a8c58c6",
+      "status" : "passed",
+      "time" : {
+        "start" : 1744490597222,
+        "stop" : 1744490598533,
+        "duration" : 1311
+      }
+    } ]
+  },
+  "fcc98247d29f8c70da3b083b2cfa2178" : {
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 1,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    },
+    "items" : [ {
+      "uid" : "e5dd16c3bb6cb0f7",
+      "status" : "broken",
+      "statusDetails" : "selenium.common.exceptions.NoSuchDriverException: Message: Unable to obtain driver for chrome; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors/driver_location",
+      "time" : {
+        "start" : 1744490599019,
+        "stop" : 1744490599019,
+        "duration" : 0
+      }
+    } ]
+  },
+  "89c350564a36eb3b6ddb50dfab972706" : {
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 1,
+      "unknown" : 0,
+      "total" : 1
+    },
+    "items" : [ {
+      "uid" : "8ceccef0831eed8e",
+      "status" : "passed",
+      "time" : {
+        "start" : 1744490598540,
+        "stop" : 1744490599012,
+        "duration" : 472
+      }
+    } ]
+  }
+}
