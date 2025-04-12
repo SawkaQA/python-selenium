@@ -1,3 +1,4 @@
+import allure
 import pytest
 import requests
 from faker.generator import random
@@ -22,35 +23,37 @@ class TestReqResEndpoints:
         assert response_username.json()['id'] == data['id'], "ID не совпадают"
 
     def test_create_pet(self, base_url, generate_faker_data):
-        statuses = ['available', 'sold']
-        data = {
-            "id": generate_faker_data['id'],
-            "category": {
-                "id": random.randint(4, 444),
-                "name": "CATS"
-            },
-            "name": faker.first_name(),
-            "photoUrls": [
-                None
-            ],
-            "tags": [
-                {
-                    "id": random.randint(3, 333),
+        with allure.step(f'Отправляем запрос на создание питомца {generate_faker_data["name"]}'):
+            statuses = ['available', 'sold']
+            data = {
+                "id": generate_faker_data['id'],
+                "category": {
+                    "id": random.randint(4, 444),
                     "name": "CATS"
-                }
-            ],
-            "status": random.choice(statuses)
-        }
+                },
+                "name": faker.first_name(),
+                "photoUrls": [
+                    None
+                ],
+                "tags": [
+                    {
+                        "id": random.randint(3, 333),
+                        "name": "CATS"
+                    }
+                ],
+                "status": random.choice(statuses)
+            }
 
-        response = requests.post(f'{base_url}/pet', json=data)
-        assert response.status_code == 200, "Ошибка создания животного"
-        assert data['name'] == response.json()['name']
+            response = requests.post(f'{base_url}/pet', json=data)
+            assert response.status_code == 200, "Ошибка создания животного"
+            assert data['name'] == response.json()['name']
 
-        response_get_pet = requests.get(f'{base_url}/pet/{data["id"]}')
-        assert response_get_pet.status_code == 200
-        assert response_get_pet.json()['name'] == data['name']
+            response_get_pet = requests.get(f'{base_url}/pet/{data["id"]}')
+            assert response_get_pet.status_code == 200
+            assert response_get_pet.json()['name'] == data['name']
 
     def test_delete_pet(self, base_url, generate_faker_data):
-        headers = {"api-key": "special-key"}
-        request = requests.delete(f'{base_url}/pet/{generate_faker_data["id"]}', headers=headers)
-        assert request.status_code == 404 or 200, "Ошибка, питомец не был удален"
+        with allure.step(f"Удаление питомца по id {generate_faker_data['id']}"):
+            headers = {"api-key": "special-key"}
+            request = requests.delete(f'{base_url}/pet/{generate_faker_data["id"]}', headers=headers)
+            assert request.status_code == 404 or 200, "Ошибка, питомец не был удален"
