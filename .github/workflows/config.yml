@@ -26,10 +26,17 @@ jobs:
       - name: Download previous Allure report
         id: download-history
         continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}  # Добавляем токен
         run: |
           mkdir -p ${{ env.ALLURE_REPORT_DIR }}
-          gh run download ${{ github.run_id }} -n previous-allure-report -D ${{ env.ALLURE_REPORT_DIR }} || echo "No previous report found"
-          echo "history_exists=$(ls ${{ env.ALLURE_REPORT_DIR }}/history >/dev/null 2>&1 && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          gh run download \
+            --repo ${{ github.repository }} \
+            ${{ github.run_id }} \
+            --name previous-allure-report \
+            --dir ${{ env.ALLURE_REPORT_DIR }} || echo "No previous report found"
+
+          echo "history_exists=$(if [ -d "${{ env.ALLURE_REPORT_DIR }}/history" ]; then echo 'true'; else echo 'false'; fi)" >> $GITHUB_OUTPUT
 
       - name: Run tests
         id: run-tests
