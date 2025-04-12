@@ -41,18 +41,16 @@ jobs:
           clean: true
 
 
-      - name: Notify Telegram on Success
+      - name: Notify Telegram chat
         if: success()
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          message: "✅ Тесты прошли успешно! ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} Allure отчет: http://your-allure-server/job/${{ github.run_id }}"
-
-      - name: Notify Telegram on Failure
-        if: failure()
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          message: "❌ Тесты упали! Срочно проверить: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} Allure отчет: http://your-allure-server/job/${{ github.run_id }}"
+          message: |
+            *Результаты тестов*
+            Статус: ${{ steps.run-tests.outcome == 'success' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
+            Файл отчета: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report
+            Детали: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            ${{ steps.run-tests.outcome == 'failure' && 'Есть упавшие тесты! Требуется проверка.' || 'Все тесты прошли успешно.' }}
+          parse_mode: markdown
