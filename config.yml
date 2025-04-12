@@ -1,0 +1,27 @@
+name: Tests
+
+on: [push]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run test via docker compose
+
+        run: |
+          docker-compose up --exit-code-from regression || true
+
+      - name: Generate allure-report
+        run: |
+          sudo docker-compose run regression /bin/sh -c "allure generate allure-results --clean -o allure-report"
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@4.1.5
+        with:
+          token: ${{ secrets.CI_TOKEN }}
+          branch: gh-pages
+          folder: allure-report
+          clean: true

@@ -22,7 +22,7 @@ def product_page(driver):
 def base_url():
     return "https://petstore.swagger.io/v2"
 
-@pytest.fixture(scope='session')
+@pytest.fixture()
 def generate_faker_data():
     return {
         "id": 2,
