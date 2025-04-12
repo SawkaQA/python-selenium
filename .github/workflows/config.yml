@@ -18,11 +18,13 @@ jobs:
           chmod +x /usr/local/bin/docker-compose
 
       - name: Download previous Allure report
-        uses: actions/download-artifact@v4
-        with:
-          name: previous-allure-report
-          path: allure-report
-        continue-on-error: true  # Продолжаем если артефакта нет
+        id: download-history
+        continue-on-error: true
+        run: |
+          mkdir -p allure-report
+          # Пытаемся скачать артефакт
+          gh run download ${{ github.run_id }} -n previous-allure-report -D allure-report || echo "No previous report found"
+          echo "history_downloaded=$(if [ -d "allure-report/history" ]; then echo "true"; else echo "false"; fi)" >> $GITHUB_OUTPUT
 
       - name: Run test via docker compose
         id: run-tests
@@ -151,7 +153,7 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            <b>📊 Результаты тестов</b>
+            <b>🚀 Результаты тестов</b>
             
             
             <b>Проект:</b> ${{ github.repository }}
