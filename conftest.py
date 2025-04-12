@@ -1,6 +1,5 @@
-from random import random
-
 import pytest
+from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from faker import Faker
 from pages.product_page import ProductPage
@@ -9,7 +8,9 @@ faker = Faker('ru-RU')
 
 @pytest.fixture
 def driver():
-    driver = webdriver.Chrome()
+    options = Options()
+    options.add_argument("--headless")
+    driver = webdriver.Chrome(options=options)
     driver.maximize_window()
     yield driver
     driver.quit()
