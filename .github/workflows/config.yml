@@ -40,6 +40,31 @@ jobs:
           folder: allure-report
           clean: true
 
+      - name: Parse Allure results
+        if: always()
+        id: allure-stats
+        run: |
+          # Установка jq для парсинга JSON
+          sudo apt-get install -y jq
+
+          # Парсинг результатов тестов
+          TOTAL=$(jq '.statistic.total' allure-results/widgets/summary.json)
+          PASSED=$(jq '.statistic.passed' allure-results/widgets/summary.json)
+          FAILED=$(jq '.statistic.failed' allure-results/widgets/summary.json)
+          SKIPPED=$(jq '.statistic.skipped' allure-results/widgets/summary.json)
+
+          # Расчет процентов
+          PASSED_PERCENT=$(( ($PASSED * 100) / $TOTAL ))
+          FAILED_PERCENT=$(( ($FAILED * 100) / $TOTAL ))
+
+          # Сохранение в outputs
+          echo "TOTAL=$TOTAL" >> $GITHUB_OUTPUT
+          echo "PASSED=$PASSED" >> $GITHUB_OUTPUT
+          echo "FAILED=$FAILED" >> $GITHUB_OUTPUT
+          echo "SKIPPED=$SKIPPED" >> $GITHUB_OUTPUT
+          echo "PASSED_PERCENT=$PASSED_PERCENT" >> $GITHUB_OUTPUT
+          echo "FAILED_PERCENT=$FAILED_PERCENT" >> $GITHUB_OUTPUT
+
 
       - name: Notify Telegram chat
         if: success()
@@ -48,16 +73,21 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            <b>📊 Результаты тестов</b>
-            <i>Проект</i>: <code>SawkaQA/python-selenium</code>
-            <i>Ветка</i>: <code>main</code>
-            <i>Статус</i>: ❌ ОШИБКИ
+            <b>📊 Детальные результаты тестов</b>
+            <i>Проект</i>: <code>${{ github.repository }}</code>
+            <i>Ветка</i>: <code>${{ github.ref_name }}</code>
+            <i>Статус</i>: ${{ steps.run-tests.outcome == 'success' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
+            
+            📈 <b>Статистика</b>:
+            • Всего тестов: ${{ steps.allure-stats.outputs.TOTAL }}
+            • Успешных: ${{ steps.allure-stats.outputs.PASSED }} (${{ steps.allure-stats.outputs.PASSED_PERCENT }}%)
+            • Упавших: ${{ steps.allure-stats.outputs.FAILED }} (${{ steps.allure-stats.outputs.FAILED_PERCENT }}%)
+            • Пропущенных: ${{ steps.allure-stats.outputs.SKIPPED }}
             
             🔗 <b>Ссылки</b>:
-            • <a href="https://SawkaQA.github.io/python-selenium/">Allure Report</a>
-            • <a href="https://github.com/SawkaQA/python-selenium/actions/runs/14422038957">GitHub Actions</a>
+            • <a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report">Allure Report</a>
+            • <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">GitHub Actions</a>
             
-            ⚠️ <i>Требуется срочная проверка!</i>
-          args: |
-            --format=html
-            --disable-web-page-preview
+            ${{ steps.run-tests.outcome == 'success' && '🎉 Все тесты прошли успешно!' || '⚠️ Требуется проверка упавших тестов!' }}
+          format: html
+          disable_web_page_preview: true
