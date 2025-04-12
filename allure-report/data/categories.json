@@ -6,12 +6,12 @@
       "name" : "selenium.common.exceptions.NoSuchDriverException: Message: Unable to obtain driver for chrome; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors/driver_location",
       "children" : [ {
         "name" : "test_open",
-        "uid" : "524953a9cdf783dd",
+        "uid" : "1d2c55a42093c6f9",
         "parentUid" : "d6d88c9c72bdfd720a36aef7f6c8d2cf",
         "status" : "broken",
         "time" : {
-          "start" : 1744490806983,
-          "stop" : 1744490806983,
+          "start" : 1744490928099,
+          "stop" : 1744490928099,
           "duration" : 0
         },
         "flaky" : false,
