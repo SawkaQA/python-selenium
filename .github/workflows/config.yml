@@ -97,23 +97,23 @@ jobs:
           message: |
             <b>📊 Результаты тестов</b>
             
-            <code>┌──────────────────────</code>
+            
             <b>Проект:</b> ${{ github.repository }}
             <b>Ветка:</b> ${{ github.ref_name }}
             <b>Статус:</b> ${{ steps.run-tests.outcome == 'success' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
-            <code>├──────────────────────</code>
+            
             
             <b>📈 Статистика</b> (${{ steps.allure-stats.outputs.TOTAL }} тестов):
             <code>│</code> • ✅ <b>Успешных:</b> ${{ steps.allure-stats.outputs.PASSED }} (${{ steps.allure-stats.outputs.PASSED_PERCENT }}%)
             <code>│</code> • ❌ <b>Упавших:</b> ${{ steps.allure-stats.outputs.FAILED }} (${{ steps.allure-stats.outputs.FAILED_PERCENT }}%)
             <code>│</code> • ⏩ <b>Пропущенных:</b> ${{ steps.allure-stats.outputs.SKIPPED }} (${{ steps.allure-stats.outputs.SKIPPED_PERCENT }}%)
             ${{ steps.allure-stats.outputs.BROKEN != '0' && '<code>│</code> • 🛠 <b>Сломанных:</b> ' || '' }}${{ steps.allure-stats.outputs.BROKEN != '0' && steps.allure-stats.outputs.BROKEN || '' }}
-            <code>├──────────────────────</code>
+            
             
             <b>🔗 Ссылки</b>:
-            <code>│</code> • <a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report">Allure Report</a>
+            <code>│</code> • <a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/">Allure Report</a>
             <code>│</code> • <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">GitHub Actions</a>
-            <code>└──────────────────────</code>
+            
             
             ${{ steps.run-tests.outcome == 'success' && '🎉 <b>Все тесты прошли успешно!</b>' || '⚠️ <b>Требуется проверка упавших тестов!</b>' }}
           format: html
