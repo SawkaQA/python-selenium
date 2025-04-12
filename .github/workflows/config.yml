@@ -106,8 +106,8 @@ jobs:
             
             <b>Проект:</b> ${{ github.repository }}
             <b>Ветка:</b> ${{ github.ref_name }}
-            <b>Статус:</b> ${{ steps.run-tests.outcome == 'success' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
-            <b>Время выполнения:</b> ${{ steps.run-tests.outputs.DURATION_READABLE }}
+            <b>Статус:</b> ${{ steps.allure-stats.outputs.FAILED == '0' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
+            <b style="color: #4CAF50;">Время выполнения:</b> ${{ steps.run-tests.outputs.DURATION_READABLE }}
             
             
             <b>📈 Статистика</b> (${{ steps.allure-stats.outputs.TOTAL }} тестов):
