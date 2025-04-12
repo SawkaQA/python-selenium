@@ -48,9 +48,13 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            *Результаты тестов*
-            Статус: ${{ steps.run-tests.outcome == 'success' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
-            Файл отчета: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report
-            Детали: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            ${{ steps.run-tests.outcome == 'failure' && 'Есть упавшие тесты! Требуется проверка.' || 'Все тесты прошли успешно.' }}
-          parse_mode: markdown
+            *📊 Результаты тестов*
+            _Проект_: \`${{ github.repository }}\`  
+            _Ветка_: \`${{ github.ref_name }}\`  
+            _Статус_: ${{ steps.run-tests.outcome == 'success' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
+
+            🔗 *Ссылки*:
+            • [Allure Report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report)  
+            • [GitHub Actions](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            ${{ steps.run-tests.outcome == 'failure' && '⚠️ _Требуется срочная проверка!_' || '' }}
