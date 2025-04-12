@@ -26,6 +26,12 @@ jobs:
         run: |
           docker-compose run regression /bin/sh -c "allure generate allure-results --clean -o allure-report"
 
+      - name: Upload Allure report
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-report
+          path: allure-report
+
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
@@ -33,3 +39,20 @@ jobs:
           branch: gh-pages
           folder: allure-report
           clean: true
+
+
+      - name: Notify Telegram on Success
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: "✅ Тесты прошли успешно! ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Notify Telegram on Failure
+        if: failure()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: "❌ Тесты упали! Срочно проверить: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
