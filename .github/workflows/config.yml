@@ -2,133 +2,128 @@ name: Tests
 
 on: [push]
 
+env:
+  DOCKER_COMPOSE_VERSION: "v2.20.2"
+  ALLURE_REPORT_DIR: "allure-report"
+  ALLURE_RESULTS_DIR: "allure-results"
+
 jobs:
   tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Set up Docker
+      - name: Setup Docker
         uses: docker/setup-buildx-action@v3
 
       - name: Install Docker Compose
         run: |
-          curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          curl -L "https://github.com/docker/compose/releases/download/${{ env.DOCKER_COMPOSE_VERSION }}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           chmod +x /usr/local/bin/docker-compose
 
       - name: Download previous Allure report
         id: download-history
         continue-on-error: true
         run: |
-          mkdir -p allure-report
-          # Пытаемся скачать артефакт
-          gh run download ${{ github.run_id }} -n previous-allure-report -D allure-report || echo "No previous report found"
-          echo "history_downloaded=$(if [ -d "allure-report/history" ]; then echo "true"; else echo "false"; fi)" >> $GITHUB_OUTPUT
+          mkdir -p ${{ env.ALLURE_REPORT_DIR }}
+          gh run download ${{ github.run_id }} -n previous-allure-report -D ${{ env.ALLURE_REPORT_DIR }} || echo "No previous report found"
+          echo "history_exists=$(ls ${{ env.ALLURE_REPORT_DIR }}/history >/dev/null 2>&1 && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
-      - name: Run test via docker compose
+      - name: Run tests
         id: run-tests
         run: |
-          start_time=$(date +%s)  # Фиксируем время начала
+          start=$(date +%s)
           docker-compose up --exit-code-from regression
-          end_time=$(date +%s)    # Фиксируем время окончания
-          duration=$((end_time - start_time))
+          duration=$(($(date +%s) - start))
           echo "DURATION_SEC=$duration" >> $GITHUB_OUTPUT
           echo "DURATION_READABLE=$(printf '%02d:%02d:%02d' $((duration/3600)) $(( (duration%3600)/60 )) $((duration%60)))" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: Generate Allure report with history
+      - name: Prepare Allure results
         if: always()
         run: |
-          # Создаём структуру директорий
-          mkdir -p allure-results/history
+          mkdir -p ${{ env.ALLURE_RESULTS_DIR }}/history
           
-          # Копируем историю из предыдущего отчёта
-          if [ -d "allure-report/history" ]; then
-            cp -r allure-report/history/* allure-results/history/ || true
+          if ${{ steps.download-history.outputs.history_exists == 'true' }}; then
+            cp -r ${{ env.ALLURE_REPORT_DIR }}/history/* ${{ env.ALLURE_RESULTS_DIR }}/history/ || true
           fi
+
+      - name: Generate Allure report
+        if: always()
+        run: |
+          docker-compose run regression /bin/sh -c "allure generate ${{ env.ALLURE_RESULTS_DIR }} --clean -o ${{ env.ALLURE_REPORT_DIR }}"
           
-          # Генерируем новый отчёт
-          docker-compose run regression /bin/sh -c "allure generate allure-results --clean -o allure-report"
+          # Create default summary if missing
+          mkdir -p ${{ env.ALLURE_RESULTS_DIR }}/widgets
+          [ -f "${{ env.ALLURE_RESULTS_DIR }}/widgets/summary.json" ] || \
+            echo '{"statistic":{"total":0,"passed":0,"failed":0,"skipped":0,"broken":0,"canceled":0}}' > ${{ env.ALLURE_RESULTS_DIR }}/widgets/summary.json
           
-          # Создаём резервный summary.json если его нет
-          mkdir -p allure-results/widgets
-          if [ ! -f allure-results/widgets/summary.json ]; then
-            echo '{"statistic":{"total":0,"passed":0,"failed":0,"skipped":0,"broken":0,"canceled":0}}' > allure-results/widgets/summary.json
-          fi
-          
-          # Добавляем информацию о запуске
-          echo "RUN_NUMBER=${{ github.run_number }}" > allure-report/environment.properties
-          echo "GIT_BRANCH=${{ github.ref_name }}" >> allure-report/environment.properties
-          echo "DURATION=${{ steps.run-tests.outputs.DURATION_READABLE }}" >> allure-report/environment.properties
-          
-      - name: Parse Allure results
+          # Add build info
+          {
+            echo "RUN_NUMBER=${{ github.run_number }}"
+            echo "GIT_BRANCH=${{ github.ref_name }}"
+            echo "DURATION=${{ steps.run-tests.outputs.DURATION_READABLE }}"
+          } > ${{ env.ALLURE_REPORT_DIR }}/environment.properties
+
+      - name: Parse test results
         if: always()
         id: allure-stats
         run: |
-          if ! command -v jq &> /dev/null; then
-            sudo apt-get update && sudo apt-get install -y jq
-          fi
-
-          # Создаем файл с дефолтными значениями если его нет
-          if [ ! -f "allure-report/widgets/summary.json" ]; then
-            mkdir -p allure-report/widgets
-            echo '{"statistic":{"total":0,"passed":0,"failed":0,"skipped":0,"broken":0,"canceled":0}}' > allure-report/widgets/summary.json
-          fi
-
-          # Парсим с дефолтными значениями
-          TOTAL=$(jq '.statistic.total // 0' allure-report/widgets/summary.json)
-          PASSED=$(jq '.statistic.passed // 0' allure-report/widgets/summary.json)
-          FAILED=$(jq '.statistic.failed // 0' allure-report/widgets/summary.json)
-          SKIPPED=$(jq '.statistic.skipped // 0' allure-report/widgets/summary.json)
-          BROKEN=$(jq '.statistic.broken // 0' allure-report/widgets/summary.json)
-          CANCELED=$(jq '.statistic.canceled // 0' allure-report/widgets/summary.json)
-
-          # Рассчитываем проценты
-          if [ $TOTAL -gt 0 ]; then
-            PASSED_PERCENT=$(( ($PASSED * 100) / $TOTAL ))
-            FAILED_PERCENT=$(( ($FAILED * 100) / $TOTAL ))
-            SKIPPED_PERCENT=$(( ($SKIPPED * 100) / $TOTAL ))
-            BROKEN_PERCENT=$(( ($BROKEN + 100) / $TOTAL ))
-          else
-            PASSED_PERCENT=0
-            FAILED_PERCENT=0
-            SKIPPED_PERCENT=0
-            BROKEN_PERCENT=0
-          fi
-
-          echo "TOTAL=$TOTAL" >> $GITHUB_OUTPUT
-          echo "PASSED=$PASSED" >> $GITHUB_OUTPUT
-          echo "FAILED=$FAILED" >> $GITHUB_OUTPUT
-          echo "SKIPPED=$SKIPPED" >> $GITHUB_OUTPUT
-          echo "BROKEN=$BROKEN" >> $GITHUB_OUTPUT
-          echo "CANCELED=$CANCELED" >> $GITHUB_OUTPUT
-          echo "PASSED_PERCENT=$PASSED_PERCENT" >> $GITHUB_OUTPUT
-          echo "FAILED_PERCENT=$FAILED_PERCENT" >> $GITHUB_OUTPUT
-          echo "SKIPPED_PERCENT=$SKIPPED_PERCENT" >> $GITHUB_OUTPUT
-          echo "BROKEN_PERCENT=$BROKEN_PERCENT" >> $GITHUB_OUTPUT
+          sudo apt-get update && sudo apt-get install -y jq
           
+          SUMMARY_FILE="${{ env.ALLURE_REPORT_DIR }}/widgets/summary.json"
+          [ -f "$SUMMARY_FILE" ] || \
+            echo '{"statistic":{"total":0,"passed":0,"failed":0,"skipped":0,"broken":0,"canceled":0}}' > "$SUMMARY_FILE"
 
-      - name: Upload Allure report
+          stats() {
+            jq -r ".statistic.$1 // 0" "$SUMMARY_FILE"
+          }
+
+          TOTAL=$(stats "total")
+          PASSED=$(stats "passed")
+          FAILED=$(stats "failed")
+          SKIPPED=$(stats "skipped")
+          BROKEN=$(stats "broken")
+          CANCELED=$(stats "canceled")
+
+          calc_percent() {
+            [ $TOTAL -gt 0 ] && echo $(( ($1 * 100) / $TOTAL )) || echo 0
+          }
+
+          {
+            echo "TOTAL=$TOTAL"
+            echo "PASSED=$PASSED"
+            echo "FAILED=$FAILED"
+            echo "SKIPPED=$SKIPPED"
+            echo "BROKEN=$BROKEN"
+            echo "CANCELED=$CANCELED"
+            echo "PASSED_PERCENT=$(calc_percent $PASSED)"
+            echo "FAILED_PERCENT=$(calc_percent $FAILED)"
+            echo "SKIPPED_PERCENT=$(calc_percent $SKIPPED)"
+            echo "BROKEN_PERCENT=$(calc_percent $BROKEN)"
+          } >> $GITHUB_OUTPUT
+
+      - name: Upload report artifacts
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
-          path: allure-report
+          path: ${{ env.ALLURE_REPORT_DIR }}
 
       - name: Save report for next run
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: previous-allure-report
-          path: allure-report
+          path: ${{ env.ALLURE_REPORT_DIR }}
           retention-days: 30
 
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@4.1.5
+        uses: JamesIves/github-pages-deploy-action@v4.1.5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
-          folder: allure-report
+          folder: ${{ env.ALLURE_REPORT_DIR }}
           clean-exclude: |
             history/*
             widgets/*
@@ -137,7 +132,6 @@ jobs:
       - name: Determine final status
         id: final-status
         run: |
-          # Проверяем наличие упавших тестов
           if [ "${{ steps.allure-stats.outputs.FAILED }}" -gt 0 ] || [ "${{ steps.allure-stats.outputs.BROKEN }}" -gt 0 ]; then
             echo "FINAL_STATUS=❌ ОШИБКИ" >> $GITHUB_OUTPUT
             echo "FINAL_MESSAGE=⚠️ <b>Требуется проверка упавших тестов!</b>" >> $GITHUB_OUTPUT
