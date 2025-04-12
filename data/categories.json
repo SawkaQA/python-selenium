@@ -1,1 +1,26 @@
-{"uid":"4b4757e66a1912dae1a509f688f20b0f","children":[{"name":"Product defects","children":[{"name":"AssertionError: Ошибка создания животного\nassert 403 == 200\n +  where 403 = <Response [403]>.status_code","children":[{"name":"test_create_pet","uid":"8802748b8bafb316","parentUid":"1be10c3d85620f1b5a34da5e20d9f10e","status":"failed","time":{"start":1744488818537,"stop":1744488818750,"duration":213},"flaky":false,"newFailed":false,"newPassed":false,"newBroken":false,"retriesCount":10,"retriesStatusChange":true,"parameters":[],"tags":[]}],"uid":"1be10c3d85620f1b5a34da5e20d9f10e"}],"uid":"8fb3a91ba5aaf9de24cc8a92edc82b5d"},{"name":"Test defects","children":[{"name":"selenium.common.exceptions.WebDriverException: Message: unknown error: Chrome failed to start: exited abnormally.\n  (unknown error: DevToolsActivePort file doesn't exist)\n  (The process started from chrome location /usr/bin/chromium-browser is no longer running, so ChromeDriver is assuming that Chrome has crashed.)","children":[{"name":"test_open","uid":"d3b39e19f812e00f","parentUid":"6a28f92c5c8a4cadb904435561a27c65","status":"broken","time":{"start":1744488818836,"stop":1744488818836,"duration":0},"flaky":false,"newFailed":false,"newPassed":false,"newBroken":false,"retriesCount":10,"retriesStatusChange":false,"parameters":[],"tags":[]}],"uid":"6a28f92c5c8a4cadb904435561a27c65"}],"uid":"bdbf199525818fae7a8651db9eafe741"}],"name":"categories"}
+{
+  "uid" : "4b4757e66a1912dae1a509f688f20b0f",
+  "children" : [ {
+    "name" : "Test defects",
+    "children" : [ {
+      "name" : "selenium.common.exceptions.NoSuchDriverException: Message: Unable to obtain driver for chrome; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors/driver_location",
+      "children" : [ {
+        "name" : "test_open",
+        "uid" : "1d2c55a42093c6f9",
+        "parentUid" : "d6d88c9c72bdfd720a36aef7f6c8d2cf",
+        "status" : "broken",
+        "time" : {
+          "start" : 1744490928099,
+          "stop" : 1744490928099,
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      } ],
+      "uid" : "d6d88c9c72bdfd720a36aef7f6c8d2cf"
+    } ],
+    "uid" : "bdbf199525818fae7a8651db9eafe741"
+  } ],
+  "name" : "categories"
+}

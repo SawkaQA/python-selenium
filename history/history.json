@@ -1,1 +1,80 @@
-{"71e25e8b4297c03eb2700b9d4149e8c1":{"statistic":{"failed":0,"broken":0,"skipped":1,"passed":0,"unknown":0,"total":1},"items":[{"uid":"38016bd236d9f2f4","status":"skipped","statusDetails":"Skipped: flaky","time":{"start":1744488818471,"stop":1744488818471,"duration":0}}]},"4cdebf693429381d9fbb925649b87a45":{"statistic":{"failed":1,"broken":0,"skipped":0,"passed":0,"unknown":0,"total":1},"items":[{"uid":"8802748b8bafb316","status":"failed","statusDetails":"AssertionError: Ошибка создания животного\nassert 403 == 200\n +  where 403 = <Response [403]>.status_code","time":{"start":1744488818537,"stop":1744488818750,"duration":213}}]},"fcc98247d29f8c70da3b083b2cfa2178":{"statistic":{"failed":0,"broken":1,"skipped":0,"passed":0,"unknown":0,"total":1},"items":[{"uid":"d3b39e19f812e00f","status":"broken","statusDetails":"selenium.common.exceptions.WebDriverException: Message: unknown error: Chrome failed to start: exited abnormally.\n  (unknown error: DevToolsActivePort file doesn't exist)\n  (The process started from chrome location /usr/bin/chromium-browser is no longer running, so ChromeDriver is assuming that Chrome has crashed.)","time":{"start":1744488818836,"stop":1744488818836,"duration":0}}]},"89c350564a36eb3b6ddb50dfab972706":{"statistic":{"failed":0,"broken":0,"skipped":0,"passed":1,"unknown":0,"total":1},"items":[{"uid":"c3da7e5dbfaa37b2","status":"passed","time":{"start":1744488818788,"stop":1744488818834,"duration":46}}]}}
+{
+  "71e25e8b4297c03eb2700b9d4149e8c1" : {
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 1,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    },
+    "items" : [ {
+      "uid" : "c3044484b900b7e",
+      "status" : "skipped",
+      "statusDetails" : "Skipped: flaky",
+      "time" : {
+        "start" : 1744490926528,
+        "stop" : 1744490926528,
+        "duration" : 0
+      }
+    } ]
+  },
+  "4cdebf693429381d9fbb925649b87a45" : {
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 1,
+      "unknown" : 0,
+      "total" : 1
+    },
+    "items" : [ {
+      "uid" : "e07cf1952b5cec34",
+      "status" : "passed",
+      "time" : {
+        "start" : 1744490926584,
+        "stop" : 1744490927619,
+        "duration" : 1035
+      }
+    } ]
+  },
+  "fcc98247d29f8c70da3b083b2cfa2178" : {
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 1,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    },
+    "items" : [ {
+      "uid" : "1d2c55a42093c6f9",
+      "status" : "broken",
+      "statusDetails" : "selenium.common.exceptions.NoSuchDriverException: Message: Unable to obtain driver for chrome; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors/driver_location",
+      "time" : {
+        "start" : 1744490928099,
+        "stop" : 1744490928099,
+        "duration" : 0
+      }
+    } ]
+  },
+  "89c350564a36eb3b6ddb50dfab972706" : {
+    "statistic" : {
+      "failed" : 0,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 1,
+      "unknown" : 0,
+      "total" : 1
+    },
+    "items" : [ {
+      "uid" : "14864b21eb822659",
+      "status" : "passed",
+      "time" : {
+        "start" : 1744490927623,
+        "stop" : 1744490928092,
+        "duration" : 469
+      }
+    } ]
+  }
+}
