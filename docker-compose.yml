@@ -2,20 +2,11 @@ version: '3.8'
 
 services:
   regression:
+    image: python:3.12.0a4-alpine3.17
     build:
       context: .
       dockerfile: Dockerfile
-    user: "${UID:-1000}:${GID:-1000}"  # Используем UID/GID хоста
     volumes:
-      - ./allure-results:/usr/workspace/allure-results
-      - ./allure-report:/usr/workspace/allure-report
-      - ./pytest.ini:/usr/workspace/pytest.ini  # только конфиги
-      - ./tests:/usr/workspace/tests  # только тесты
+      - ./:/usr/workspace
+    command: /bin/sh -c "ls -la && pytest -sv --alluredir=allure-results"
     working_dir: /usr/workspace
-    environment:
-      - ALLURE_NO_ANALYTICS=1
-      - PYTHONUNBUFFERED=1
-    command: >
-      sh -c "pytest -sv --alluredir=allure-results
-      && allure generate allure-results --clean -o allure-report --no-perms
-      || echo 'Test execution completed with status $?'"
