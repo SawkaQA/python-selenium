@@ -41,13 +41,16 @@ jobs:
           echo "DURATION_READABLE=$(printf '%02d:%02d:%02d' $((duration/3600)) $(( (duration%3600)/60 )) $((duration%60)))" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: Prepare Allure results
+      - name: Prepare Allure history
         if: always()
         run: |
           mkdir -p ${{ env.ALLURE_RESULTS_DIR }}/history
           
-          if ${{ steps.download-history.outputs.history_exists == 'true' }}; then
+          if [ -d "${{ env.ALLURE_REPORT_DIR }}/history" ]; then
+            echo "Копируем историю из предыдущего отчёта..."
             cp -r ${{ env.ALLURE_REPORT_DIR }}/history/* ${{ env.ALLURE_RESULTS_DIR }}/history/ || true
+          else
+            echo "Предыдущей истории не найдено, создаём новую..."
           fi
 
       - name: Generate Allure report
@@ -55,12 +58,7 @@ jobs:
         run: |
           docker-compose run regression /bin/sh -c "allure generate ${{ env.ALLURE_RESULTS_DIR }} --clean -o ${{ env.ALLURE_REPORT_DIR }}"
           
-          # Create default summary if missing
-          mkdir -p ${{ env.ALLURE_RESULTS_DIR }}/widgets
-          [ -f "${{ env.ALLURE_RESULTS_DIR }}/widgets/summary.json" ] || \
-            echo '{"statistic":{"total":0,"passed":0,"failed":0,"skipped":0,"broken":0,"canceled":0}}' > ${{ env.ALLURE_RESULTS_DIR }}/widgets/summary.json
-          
-          # Add build info
+          # Добавляем информацию о запуске
           {
             echo "RUN_NUMBER=${{ github.run_number }}"
             echo "GIT_BRANCH=${{ github.ref_name }}"
@@ -77,16 +75,12 @@ jobs:
           [ -f "$SUMMARY_FILE" ] || \
             echo '{"statistic":{"total":0,"passed":0,"failed":0,"skipped":0,"broken":0,"canceled":0}}' > "$SUMMARY_FILE"
 
-          stats() {
-            jq -r ".statistic.$1 // 0" "$SUMMARY_FILE"
-          }
-
-          TOTAL=$(stats "total")
-          PASSED=$(stats "passed")
-          FAILED=$(stats "failed")
-          SKIPPED=$(stats "skipped")
-          BROKEN=$(stats "broken")
-          CANCELED=$(stats "canceled")
+          TOTAL=$(jq -r '.statistic.total // 0' "$SUMMARY_FILE")
+          PASSED=$(jq -r '.statistic.passed // 0' "$SUMMARY_FILE")
+          FAILED=$(jq -r '.statistic.failed // 0' "$SUMMARY_FILE")
+          SKIPPED=$(jq -r '.statistic.skipped // 0' "$SUMMARY_FILE")
+          BROKEN=$(jq -r '.statistic.broken // 0' "$SUMMARY_FILE")
+          CANCELED=$(jq -r '.statistic.canceled // 0' "$SUMMARY_FILE")
 
           calc_percent() {
             [ $TOTAL -gt 0 ] && echo $(( ($1 * 100) / $TOTAL )) || echo 0
@@ -139,6 +133,8 @@ jobs:
             echo "FINAL_STATUS=✅ УСПЕШНО" >> $GITHUB_OUTPUT
             echo "FINAL_MESSAGE=🎉 <b>Все тесты прошли успешно!</b>" >> $GITHUB_OUTPUT
           fi
+          # Логируем вывод для отладки
+          echo "FINAL_MESSAGE: ${{ steps.final-status.outputs.FINAL_MESSAGE }}"
 
       - name: Send Telegram notification
         if: always()
