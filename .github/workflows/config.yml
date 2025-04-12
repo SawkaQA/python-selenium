@@ -64,10 +64,12 @@ jobs:
             PASSED_PERCENT=$(( ($PASSED * 100) / $TOTAL ))
             FAILED_PERCENT=$(( ($FAILED * 100) / $TOTAL ))
             SKIPPED_PERCENT=$(( ($SKIPPED * 100) / $TOTAL ))
+            BROKEN_PERCENT=$(( ($BROKEN + 100) / $TOTAL ))
           else
             PASSED_PERCENT=0
             FAILED_PERCENT=0
             SKIPPED_PERCENT=0
+            BROKEN_PERCENT=0
           fi
 
           echo "TOTAL=$TOTAL" >> $GITHUB_OUTPUT
@@ -78,7 +80,9 @@ jobs:
           echo "CANCELED=$CANCELED" >> $GITHUB_OUTPUT
           echo "PASSED_PERCENT=$PASSED_PERCENT" >> $GITHUB_OUTPUT
           echo "FAILED_PERCENT=$FAILED_PERCENT" >> $GITHUB_OUTPUT
-          echo "SKIPPED_PERCENT=$SKIPPED_PERCENT" >> $GITHUB_OUTPUT  
+          echo "SKIPPED_PERCENT=$SKIPPED_PERCENT" >> $GITHUB_OUTPUT
+          echo "BROKEN_PERCENT=$BROKEN_PERCENT" >> $GITHUB_OUTPUT
+          
 
       - name: Upload Allure report
         uses: actions/upload-artifact@v4
@@ -126,7 +130,7 @@ jobs:
             <code>│</code> • ✅ <b>Успешных:</b> ${{ steps.allure-stats.outputs.PASSED }} (${{ steps.allure-stats.outputs.PASSED_PERCENT }}%)
             <code>│</code> • ❌ <b>Упавших:</b> ${{ steps.allure-stats.outputs.FAILED }} (${{ steps.allure-stats.outputs.FAILED_PERCENT }}%)
             <code>│</code> • ⏩ <b>Пропущенных:</b> ${{ steps.allure-stats.outputs.SKIPPED }} (${{ steps.allure-stats.outputs.SKIPPED_PERCENT }}%)
-            ${{ steps.allure-stats.outputs.BROKEN != '0' && '<code>│</code> • 🛠 <b>Сломанных:</b> ' || '' }}${{ steps.allure-stats.outputs.BROKEN != '0' && steps.allure-stats.outputs.BROKEN || '' }}
+            ${{ steps.allure-stats.outputs.BROKEN != '0' && '<code>│</code> • 🛠 <b>Сломанных:</b> ' || '' }}${{ steps.allure-stats.outputs.BROKEN != '0' && format('{0} ({1}%)', steps.allure-stats.outputs.BROKEN, steps.allure-stats.outputs.BROKEN_PERCENT) || '' }}            
             
             
             <b>🔗 Ссылки</b>:
