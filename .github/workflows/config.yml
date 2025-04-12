@@ -39,20 +39,19 @@ jobs:
             sudo apt-get update && sudo apt-get install -y jq
           fi
 
-          # Получаем полную разбивку по всем статусам
-          TOTAL=$(jq '.statistic.total' allure-report/widgets/summary.json || echo 0)
-          PASSED=$(jq '.statistic.passed' allure-report/widgets/summary.json || echo 0)
-          FAILED=$(jq '.statistic.failed' allure-report/widgets/summary.json || echo 0)
-          SKIPPED=$(jq '.statistic.skipped' allure-report/widgets/summary.json || echo 0)
-          BROKEN=$(jq '.statistic.broken' allure-report/widgets/summary.json || echo 0)
-          CANCELED=$(jq '.statistic.canceled' allure-report/widgets/summary.json || echo 0)
-
-          # Проверяем сумму
-          CALCULATED_TOTAL=$((PASSED + FAILED + SKIPPED + BROKEN + CANCELED))
-          if [ $TOTAL -ne $CALCULATED_TOTAL ]; then
-            echo "Warning: Total tests ($TOTAL) doesn't match sum of categories ($CALCULATED_TOTAL)" >&2
-            TOTAL=$CALCULATED_TOTAL
+          # Создаем файл с дефолтными значениями если его нет
+          if [ ! -f "allure-report/widgets/summary.json" ]; then
+            mkdir -p allure-report/widgets
+            echo '{"statistic":{"total":0,"passed":0,"failed":0,"skipped":0,"broken":0,"canceled":0}}' > allure-report/widgets/summary.json
           fi
+
+          # Парсим с дефолтными значениями
+          TOTAL=$(jq '.statistic.total // 0' allure-report/widgets/summary.json)
+          PASSED=$(jq '.statistic.passed // 0' allure-report/widgets/summary.json)
+          FAILED=$(jq '.statistic.failed // 0' allure-report/widgets/summary.json)
+          SKIPPED=$(jq '.statistic.skipped // 0' allure-report/widgets/summary.json)
+          BROKEN=$(jq '.statistic.broken // 0' allure-report/widgets/summary.json)
+          CANCELED=$(jq '.statistic.canceled // 0' allure-report/widgets/summary.json)
 
           # Рассчитываем проценты
           if [ $TOTAL -gt 0 ]; then
@@ -101,16 +100,15 @@ jobs:
             <b>Ветка</b>: <code>${{ github.ref_name }}</code>
             <b>Статус</b>: ${{ steps.run-tests.outcome == 'success' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
 
-             <b>📈Статистика</b>:
-              • Всего тестов: ${{ steps.allure-stats.outputs.TOTAL }}
+             <b>📈Всего тестов: ${{ steps.allure-stats.outputs.TOTAL }}</b>
               • ✅ Успешных: ${{ steps.allure-stats.outputs.PASSED }} (${{ steps.allure-stats.outputs.PASSED_PERCENT }}%)
               • ❌ Упавших: ${{ steps.allure-stats.outputs.FAILED }} (${{ steps.allure-stats.outputs.FAILED_PERCENT }}%)
               • ⏩ Пропущенных: ${{ steps.allure-stats.outputs.SKIPPED }} (${{ steps.allure-stats.outputs.SKIPPED_PERCENT }}%)
-              • 🛠 Сломанных: ${{ steps.allure-stats.outputs.BROKEN }}
-              • 🚫 Отменённых: ${{ steps.allure-stats.outputs.CANCELED }}
+              ${{ steps.allure-stats.outputs.BROKEN != '0' && '• 🛠 Сломанных: ' || '' }}${{ steps.allure-stats.outputs.BROKEN != '0' && steps.allure-stats.outputs.BROKEN || '' }}
+              ${{ steps.allure-stats.outputs.CANCELED != '0' && '• 🚫 Отменённых: ' || '' }}${{ steps.allure-stats.outputs.CANCELED != '0' && steps.allure-stats.outputs.CANCELED || '' }}
 
              <b>🔗Ссылки</b>:
-              • <a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report">Allure Report</a>
+              • <a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/">Allure Report</a>
               • <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">GitHub Actions</a>
 
             ${{ steps.run-tests.outcome == 'success' && '🎉 Все тесты прошли успешно!' || '⚠️ Требуется проверка упавших тестов!' }}
