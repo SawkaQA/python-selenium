@@ -48,13 +48,16 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            *📊 Результаты тестов*
-            _Проект_: \`${{ github.repository }}\`  
-            _Ветка_: \`${{ github.ref_name }}\`  
-            _Статус_: ${{ steps.run-tests.outcome == 'success' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
-
-            🔗 *Ссылки*:
-            • [Allure Report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report)  
-            • [GitHub Actions](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-
-            ${{ steps.run-tests.outcome == 'failure' && '⚠️ _Требуется срочная проверка!_' || '' }}
+            <b>📊 Результаты тестов</b>
+            <i>Проект</i>: <code>SawkaQA/python-selenium</code>
+            <i>Ветка</i>: <code>main</code>
+            <i>Статус</i>: ❌ ОШИБКИ
+            
+            🔗 <b>Ссылки</b>:
+            • <a href="https://SawkaQA.github.io/python-selenium/">Allure Report</a>
+            • <a href="https://github.com/SawkaQA/python-selenium/actions/runs/14422038957">GitHub Actions</a>
+            
+            ⚠️ <i>Требуется срочная проверка!</i>
+          args: |
+            --format=html
+            --disable-web-page-preview
