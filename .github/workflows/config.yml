@@ -18,8 +18,14 @@ jobs:
           chmod +x /usr/local/bin/docker-compose
 
       - name: Run test via docker compose
+        id: run-tests
         run: |
+          start_time=$(date +%s)  # Фиксируем время начала
           docker-compose up --exit-code-from regression
+          end_time=$(date +%s)    # Фиксируем время окончания
+          duration=$((end_time - start_time))
+          echo "DURATION_SEC=$duration" >> $GITHUB_OUTPUT
+          echo "DURATION_READABLE=$(printf '%02d:%02d:%02d' $((duration/3600)) $(( (duration%3600)/60 )) $((duration%60)))" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Generate Allure report
@@ -101,6 +107,7 @@ jobs:
             <b>Проект:</b> ${{ github.repository }}
             <b>Ветка:</b> ${{ github.ref_name }}
             <b>Статус:</b> ${{ steps.run-tests.outcome == 'success' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
+            <b>Время выполнения:</b> ${{ steps.run-tests.outputs.DURATION_READABLE }}
             
             
             <b>📈 Статистика</b> (${{ steps.allure-stats.outputs.TOTAL }} тестов):
