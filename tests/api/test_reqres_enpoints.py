@@ -23,7 +23,7 @@ class TestReqResEndpoints:
         assert response_username.json()['id'] == data['id'], "ID не совпадают"
 
     def test_create_pet(self, base_url, generate_faker_data):
-        with allure.step(f'Отправляем запрос на создание питомца {generate_faker_data["name"]}'):
+        with allure.step(f'Отправляем запрос на создание питомца {generate_faker_data["username"]}'):
             statuses = ['available', 'sold']
             data = {
                 "id": generate_faker_data['id'],
