@@ -39,10 +39,10 @@ jobs:
             sudo apt-get update && sudo apt-get install -y jq
           fi
           
-          TOTAL=$(jq '.statistic.total' allure-results/widgets/summary.json || echo 0)
-          PASSED=$(jq '.statistic.passed' allure-results/widgets/summary.json || echo 0)
-          FAILED=$(jq '.statistic.failed' allure-results/widgets/summary.json || echo 0)
-          SKIPPED=$(jq '.statistic.skipped' allure-results/widgets/summary.json || echo 0)
+          TOTAL=$(jq '.statistic.total' allure-report/widgets/summary.json || echo 0)
+          PASSED=$(jq '.statistic.passed' allure-report/widgets/summary.json || echo 0)
+          FAILED=$(jq '.statistic.failed' allure-report/widgets/summary.json || echo 0)
+          SKIPPED=$(jq '.statistic.skipped' allure-report/widgets/summary.json || echo 0)
           
           if [ $TOTAL -gt 0 ]; then
             PASSED_PERCENT=$(( ($PASSED * 100) / $TOTAL ))
