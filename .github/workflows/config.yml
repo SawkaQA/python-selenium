@@ -38,26 +38,42 @@ jobs:
           if ! command -v jq &> /dev/null; then
             sudo apt-get update && sudo apt-get install -y jq
           fi
-          
+
+          # Получаем полную разбивку по всем статусам
           TOTAL=$(jq '.statistic.total' allure-report/widgets/summary.json || echo 0)
           PASSED=$(jq '.statistic.passed' allure-report/widgets/summary.json || echo 0)
           FAILED=$(jq '.statistic.failed' allure-report/widgets/summary.json || echo 0)
           SKIPPED=$(jq '.statistic.skipped' allure-report/widgets/summary.json || echo 0)
-          
+          BROKEN=$(jq '.statistic.broken' allure-report/widgets/summary.json || echo 0)
+          CANCELED=$(jq '.statistic.canceled' allure-report/widgets/summary.json || echo 0)
+
+          # Проверяем сумму
+          CALCULATED_TOTAL=$((PASSED + FAILED + SKIPPED + BROKEN + CANCELED))
+          if [ $TOTAL -ne $CALCULATED_TOTAL ]; then
+            echo "Warning: Total tests ($TOTAL) doesn't match sum of categories ($CALCULATED_TOTAL)" >&2
+            TOTAL=$CALCULATED_TOTAL
+          fi
+
+          # Рассчитываем проценты
           if [ $TOTAL -gt 0 ]; then
             PASSED_PERCENT=$(( ($PASSED * 100) / $TOTAL ))
             FAILED_PERCENT=$(( ($FAILED * 100) / $TOTAL ))
+            SKIPPED_PERCENT=$(( ($SKIPPED * 100) / $TOTAL ))
           else
             PASSED_PERCENT=0
             FAILED_PERCENT=0
+            SKIPPED_PERCENT=0
           fi
-          
+
           echo "TOTAL=$TOTAL" >> $GITHUB_OUTPUT
           echo "PASSED=$PASSED" >> $GITHUB_OUTPUT
           echo "FAILED=$FAILED" >> $GITHUB_OUTPUT
           echo "SKIPPED=$SKIPPED" >> $GITHUB_OUTPUT
+          echo "BROKEN=$BROKEN" >> $GITHUB_OUTPUT
+          echo "CANCELED=$CANCELED" >> $GITHUB_OUTPUT
           echo "PASSED_PERCENT=$PASSED_PERCENT" >> $GITHUB_OUTPUT
-          echo "FAILED_PERCENT=$FAILED_PERCENT" >> $GITHUB_OUTPUT  
+          echo "FAILED_PERCENT=$FAILED_PERCENT" >> $GITHUB_OUTPUT
+          echo "SKIPPED_PERCENT=$SKIPPED_PERCENT" >> $GITHUB_OUTPUT  
 
       - name: Upload Allure report
         uses: actions/upload-artifact@v4
@@ -81,15 +97,17 @@ jobs:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
             <b>📊 Результаты тестов</b>
-            <i>Проект</i>: <code>${{ github.repository }}</code>
-            <i>Ветка</i>: <code>${{ github.ref_name }}</code>
-            <i>Статус</i>: ${{ steps.run-tests.outcome == 'success' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
+            <b>Проект</b>: <code>${{ github.repository }}</code>
+            <b>Ветка</b>: <code>${{ github.ref_name }}</code>
+            <b>Статус</b>: ${{ steps.run-tests.outcome == 'success' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
 
             📈 <b>Статистика</b>:
             • Всего тестов: ${{ steps.allure-stats.outputs.TOTAL }}
-            • Успешных: ${{ steps.allure-stats.outputs.PASSED }} (${{ steps.allure-stats.outputs.PASSED_PERCENT }}%)
-            • Упавших: ${{ steps.allure-stats.outputs.FAILED }} (${{ steps.allure-stats.outputs.FAILED_PERCENT }}%)
-            • Пропущенных: ${{ steps.allure-stats.outputs.SKIPPED }}
+            • ✅ Успешных: ${{ steps.allure-stats.outputs.PASSED }} (${{ steps.allure-stats.outputs.PASSED_PERCENT }}%)
+            • ❌ Упавших: ${{ steps.allure-stats.outputs.FAILED }} (${{ steps.allure-stats.outputs.FAILED_PERCENT }}%)
+            • ⏩ Пропущенных: ${{ steps.allure-stats.outputs.SKIPPED }} (${{ steps.allure-stats.outputs.SKIPPED_PERCENT }}%)
+            • 🛠 Сломанных: ${{ steps.allure-stats.outputs.BROKEN }}
+            • 🚫 Отменённых: ${{ steps.allure-stats.outputs.CANCELED 
 
             🔗 <b>Ссылки</b>:
             • <a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report">Allure Report</a>
