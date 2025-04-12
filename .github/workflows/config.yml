@@ -17,6 +17,13 @@ jobs:
           curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           chmod +x /usr/local/bin/docker-compose
 
+      - name: Download previous Allure report
+        uses: actions/download-artifact@v3
+        with:
+          name: previous-allure-report
+          path: allure-report
+        continue-on-error: true  # Продолжаем если артефакта нет
+
       - name: Run test via docker compose
         id: run-tests
         run: |
@@ -31,30 +38,27 @@ jobs:
       - name: Generate Allure report with history
         if: always()
         run: |
-          # Создаём необходимые директории
-          mkdir -p allure-report/history
+          # Создаём структуру директорий
           mkdir -p allure-results/history
-
-          # Копируем историю из предыдущего отчёта (если существует)
+          
+          # Копируем историю из предыдущего отчёта
           if [ -d "allure-report/history" ]; then
             cp -r allure-report/history/* allure-results/history/ || true
           fi
-
-          # Генерируем новый отчёт с сохранением истории
+          
+          # Генерируем новый отчёт
           docker-compose run regression /bin/sh -c "allure generate allure-results --clean -o allure-report"
-
+          
           # Создаём резервный summary.json если его нет
           mkdir -p allure-results/widgets
           if [ ! -f allure-results/widgets/summary.json ]; then
-            echo '{"statistic":{"total":0,"passed":0,"failed":0,"skipped":0}}' > allure-results/widgets/summary.json
+            echo '{"statistic":{"total":0,"passed":0,"failed":0,"skipped":0,"broken":0,"canceled":0}}' > allure-results/widgets/summary.json
           fi
-
-          # Сохраняем историю для следующего запуска
-          cp -r allure-report/history allure-results/ || true
-
-          # Добавляем информацию о среде выполнения
-          echo "RUN_NUMBER=${{ github.run_number }}" > allure-results/environment.properties
-          echo "GIT_BRANCH=${{ github.ref }}" >> allure-results/environment.properties
+          
+          # Добавляем информацию о запуске
+          echo "RUN_NUMBER=${{ github.run_number }}" > allure-report/environment.properties
+          echo "GIT_BRANCH=${{ github.ref_name }}" >> allure-report/environment.properties
+          echo "DURATION=${{ steps.run-tests.outputs.DURATION_READABLE }}" >> allure-report/environment.properties
           
       - name: Parse Allure results
         if: always()
@@ -109,12 +113,23 @@ jobs:
           name: allure-report
           path: allure-report
 
+      - name: Save report for next run
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: previous-allure-report
+          path: allure-report
+          retention-days: 30
+
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           folder: allure-report
+          clean-exclude: |
+            history/*
+            widgets/*
           clean: false
 
       - name: Determine final status
