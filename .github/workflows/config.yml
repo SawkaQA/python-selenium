@@ -38,15 +38,17 @@ jobs:
 
           echo "history_exists=$(if [ -d "${{ env.ALLURE_REPORT_DIR }}/history" ]; then echo 'true'; else echo 'false'; fi)" >> $GITHUB_OUTPUT
 
-      - name: Run tests
-        id: run-tests
+      - name: Prepare directories
         run: |
-          start=$(date +%s)
+          mkdir -p allure-report allure-results
+          chmod -R 777 allure-report allure-results
+
+      - name: Run tests
+        env:
+          UID: ${{ github.run_id }}
+          GID: ${{ github.run_id }}
+        run: |
           docker-compose up --exit-code-from regression
-          duration=$(($(date +%s) - start))
-          echo "DURATION_SEC=$duration" >> $GITHUB_OUTPUT
-          echo "DURATION_READABLE=$(printf '%02d:%02d:%02d' $((duration/3600)) $(( (duration%3600)/60 )) $((duration%60)))" >> $GITHUB_OUTPUT
-        continue-on-error: true
 
       - name: Prepare Allure history
         if: always()
