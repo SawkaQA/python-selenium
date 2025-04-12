@@ -96,22 +96,22 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            <b>📊 Результаты тестов</b>
+            <b>📊Результаты тестов</b>
             <b>Проект</b>: <code>${{ github.repository }}</code>
             <b>Ветка</b>: <code>${{ github.ref_name }}</code>
             <b>Статус</b>: ${{ steps.run-tests.outcome == 'success' && '✅ УСПЕШНО' || '❌ ОШИБКИ' }}
 
-             <b>📈 Статистика</b>:
-            • Всего тестов: ${{ steps.allure-stats.outputs.TOTAL }}
-            • ✅ Успешных: ${{ steps.allure-stats.outputs.PASSED }} (${{ steps.allure-stats.outputs.PASSED_PERCENT }}%)
-            • ❌ Упавших: ${{ steps.allure-stats.outputs.FAILED }} (${{ steps.allure-stats.outputs.FAILED_PERCENT }}%)
-            • ⏩ Пропущенных: ${{ steps.allure-stats.outputs.SKIPPED }} (${{ steps.allure-stats.outputs.SKIPPED_PERCENT }}%)
-            • 🛠 Сломанных: ${{ steps.allure-stats.outputs.BROKEN }}
-            • 🚫 Отменённых: ${{ steps.allure-stats.outputs.CANCELED 
+             <b>📈Статистика</b>:
+              • Всего тестов: ${{ steps.allure-stats.outputs.TOTAL }}
+              • ✅ Успешных: ${{ steps.allure-stats.outputs.PASSED }} (${{ steps.allure-stats.outputs.PASSED_PERCENT }}%)
+              • ❌ Упавших: ${{ steps.allure-stats.outputs.FAILED }} (${{ steps.allure-stats.outputs.FAILED_PERCENT }}%)
+              • ⏩ Пропущенных: ${{ steps.allure-stats.outputs.SKIPPED }} (${{ steps.allure-stats.outputs.SKIPPED_PERCENT }}%)
+              • 🛠 Сломанных: ${{ steps.allure-stats.outputs.BROKEN }}
+              • 🚫 Отменённых: ${{ steps.allure-stats.outputs.CANCELED }}
 
-             <b>🔗 Ссылки</b>:
-            • <a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report">Allure Report</a>
-            • <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">GitHub Actions</a>
+             <b>🔗Ссылки</b>:
+              • <a href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report">Allure Report</a>
+              • <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">GitHub Actions</a>
 
             ${{ steps.run-tests.outcome == 'success' && '🎉 Все тесты прошли успешно!' || '⚠️ Требуется проверка упавших тестов!' }}
           format: html
