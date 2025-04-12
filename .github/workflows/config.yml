@@ -56,14 +56,17 @@ jobs:
       - name: Generate Allure report
         if: always()
         run: |
-          docker-compose run regression /bin/sh -c "allure generate ${{ env.ALLURE_RESULTS_DIR }} --clean -o ${{ env.ALLURE_REPORT_DIR }}"
-          
-          # Добавляем информацию о запуске
-          {
-            echo "RUN_NUMBER=${{ github.run_number }}"
-            echo "GIT_BRANCH=${{ github.ref_name }}"
-            echo "DURATION=${{ steps.run-tests.outputs.DURATION_READABLE }}"
-          } > ${{ env.ALLURE_REPORT_DIR }}/environment.properties
+          # Сначала создаём папку и файл с нужными правами
+          mkdir -p ${{ env.ALLURE_REPORT_DIR }}
+          touch ${{ env.ALLURE_REPORT_DIR }}/environment.properties
+          chmod 777 ${{ env.ALLURE_REPORT_DIR }}/environment.properties
+
+          # Генерируем отчёт
+          docker-compose run -u root regression /bin/sh -c \
+            "allure generate ${{ env.ALLURE_RESULTS_DIR }} --clean -o ${{ env.ALLURE_REPORT_DIR }} && \
+            echo 'RUN_NUMBER=${{ github.run_number }}' > ${{ env.ALLURE_REPORT_DIR }}/environment.properties && \
+            echo 'GIT_BRANCH=${{ github.ref_name }}' >> ${{ env.ALLURE_REPORT_DIR }}/environment.properties && \
+            echo 'DURATION=${{ steps.run-tests.outputs.DURATION_READABLE }}' >> ${{ env.ALLURE_REPORT_DIR }}/environment.properties"
 
       - name: Parse test results
         if: always()
