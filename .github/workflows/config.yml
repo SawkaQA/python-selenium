@@ -40,7 +40,9 @@ jobs:
           [ -d "gh-pages/history" ] && cp -R gh-pages/history/* ${{ env.ALLURE_RESULTS_DIR }}/history/ || echo "No history found"
 
       - name: Run tests
-        run: docker compose up tests --build --exit-code-from tests --abort-on-container-exit
+        run: |
+          docker compose build
+          xvfb-run -a docker compose up
 
       - name: Generate Allure report
         if: success() || failure()  # Всегда генерируем отчет

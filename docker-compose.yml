@@ -2,9 +2,8 @@ version: '3.8'
 
 services:
   tests:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
+    shm_size: '2gb'  # Важно для Chrome
     volumes:
       - ./:/usr/workspace
       - ./allure-results:/usr/workspace/allure-results
@@ -13,6 +12,7 @@ services:
     environment:
       TZ: Europe/Moscow
       PYTHONUNBUFFERED: 1
+      SCREEN_RESOLUTION: 1920x1080x24
     command: >
       sh -c "pytest tests/ --alluredir=allure-results --clean-alluredir || echo 'Pytest finished with exit code $?';
              allure generate allure-results --clean -o allure-report"

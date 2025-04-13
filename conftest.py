@@ -1,3 +1,4 @@
+import uuid
 import pytest
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
@@ -9,7 +10,10 @@ faker = Faker('ru-RU')
 @pytest.fixture
 def driver():
     options = Options()
-    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--headless=new")  # Новый headless-режим
+    options.add_argument(f"--user-data-dir=/tmp/chrome-profile-{str(uuid.uuid4())}")
     driver = webdriver.Chrome(options=options)
     driver.maximize_window()
     yield driver
