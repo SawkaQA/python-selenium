@@ -6,12 +6,12 @@
       "name" : "api.test_reqres_enpoints",
       "children" : [ {
         "name" : "test_create_user",
-        "uid" : "c3044484b900b7e",
+        "uid" : "49f5b348774a8137",
         "parentUid" : "d326161c6a9e87cec6cbd3f648f16ff7",
         "status" : "skipped",
         "time" : {
-          "start" : 1744490926528,
-          "stop" : 1744490926528,
+          "start" : 1744542216206,
+          "stop" : 1744542216206,
           "duration" : 0
         },
         "flaky" : false,
@@ -19,26 +19,26 @@
         "parameters" : [ ]
       }, {
         "name" : "test_create_pet",
-        "uid" : "e07cf1952b5cec34",
+        "uid" : "48433b96bc84f664",
         "parentUid" : "d326161c6a9e87cec6cbd3f648f16ff7",
-        "status" : "passed",
+        "status" : "failed",
         "time" : {
-          "start" : 1744490926584,
-          "stop" : 1744490927619,
-          "duration" : 1035
+          "start" : 1744542216263,
+          "stop" : 1744542217269,
+          "duration" : 1006
         },
         "flaky" : false,
         "newFailed" : false,
         "parameters" : [ ]
       }, {
         "name" : "test_delete_pet",
-        "uid" : "14864b21eb822659",
+        "uid" : "5f16a3be7e01410a",
         "parentUid" : "d326161c6a9e87cec6cbd3f648f16ff7",
         "status" : "passed",
         "time" : {
-          "start" : 1744490927623,
-          "stop" : 1744490928092,
-          "duration" : 469
+          "start" : 1744542217302,
+          "stop" : 1744542217784,
+          "duration" : 482
         },
         "flaky" : false,
         "newFailed" : false,
@@ -49,12 +49,12 @@
       "name" : "ui.test_products_page",
       "children" : [ {
         "name" : "test_open",
-        "uid" : "1d2c55a42093c6f9",
+        "uid" : "6365857b5d8081c2",
         "parentUid" : "d815bb48bb4c56cefa1e109d79c6a7ba",
         "status" : "broken",
         "time" : {
-          "start" : 1744490928099,
-          "stop" : 1744490928099,
+          "start" : 1744542217787,
+          "stop" : 1744542217787,
           "duration" : 0
         },
         "flaky" : false,

@@ -1,17 +1,38 @@
 {
   "uid" : "4b4757e66a1912dae1a509f688f20b0f",
   "children" : [ {
+    "name" : "Product defects",
+    "children" : [ {
+      "name" : "AssertionError: assert 'CatTest' == 'Агафон'\n  \n  - Агафон\n  + CatTest",
+      "children" : [ {
+        "name" : "test_create_pet",
+        "uid" : "48433b96bc84f664",
+        "parentUid" : "18d5898d995930951e77d3e66649b1ae",
+        "status" : "failed",
+        "time" : {
+          "start" : 1744542216263,
+          "stop" : 1744542217269,
+          "duration" : 1006
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "parameters" : [ ]
+      } ],
+      "uid" : "18d5898d995930951e77d3e66649b1ae"
+    } ],
+    "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
+  }, {
     "name" : "Test defects",
     "children" : [ {
       "name" : "selenium.common.exceptions.NoSuchDriverException: Message: Unable to obtain driver for chrome; For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors/driver_location",
       "children" : [ {
         "name" : "test_open",
-        "uid" : "1d2c55a42093c6f9",
+        "uid" : "6365857b5d8081c2",
         "parentUid" : "d6d88c9c72bdfd720a36aef7f6c8d2cf",
         "status" : "broken",
         "time" : {
-          "start" : 1744490928099,
-          "stop" : 1744490928099,
+          "start" : 1744542217787,
+          "stop" : 1744542217787,
           "duration" : 0
         },
         "flaky" : false,
