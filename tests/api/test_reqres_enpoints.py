@@ -3,9 +3,10 @@ import pytest
 import requests
 from faker.generator import random
 from conftest import generate_faker_data, base_url, faker
+from utils.helper import Helper
 
 
-class TestReqResEndpoints:
+class TestReqResEndpoints(Helper):
 
     @pytest.mark.skip("flaky")
     def test_create_user(self, base_url, generate_faker_data):
@@ -21,6 +22,7 @@ class TestReqResEndpoints:
         response_username = requests.get(f'{base_url}/user/{data["username"]}')
         assert response_username.json()['username'] == data['username']
         assert response_username.json()['id'] == data['id'], "ID не совпадают"
+        self.attach_response(response.json())
 
     def test_create_pet(self, base_url, generate_faker_data):
         with allure.step(f'Отправляем запрос на создание питомца {generate_faker_data["username"]}'):
@@ -51,9 +53,11 @@ class TestReqResEndpoints:
             response_get_pet = requests.get(f'{base_url}/pet/{data["id"]}')
             assert response_get_pet.status_code == 200
             assert response_get_pet.json()['name'] == data['name']
+            self.attach_response(response.json())
 
     def test_delete_pet(self, base_url, generate_faker_data):
         with allure.step(f"Удаление питомца по id {generate_faker_data['id']}"):
             headers = {"api-key": "special-key"}
             request = requests.delete(f'{base_url}/pet/{generate_faker_data["id"]}', headers=headers)
             assert request.status_code == 404 or 200, "Ошибка, питомец не был удален"
+
