@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Checkout (copy) gh-pages repository to GitHub runner
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: ./.github/gh-pages
@@ -108,7 +108,6 @@ jobs:
             <b>Проект:</b> ${{ github.repository }}
             <b>Ветка:</b> ${{ github.ref_name }}
             <b>Статус:</b> ${{ steps.allure-stats.outputs.FAILED == '0' && '✅' || '❌' }}
-            <b>Время выполнения:</b> ${{ steps.run-tests.outputs.DURATION_READABLE }}
             
             
             <b>📈 Статистика</b> (${{ steps.allure-stats.outputs.TOTAL }} тестов):
