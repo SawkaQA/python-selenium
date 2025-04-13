@@ -1,6 +1,5 @@
 
 
-
 class Links:
 
-    URL = "https://demoqa.com/"
+   HOME_URL = "https://demoqa.com/"

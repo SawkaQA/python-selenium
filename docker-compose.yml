@@ -4,7 +4,7 @@ services:
   regression:
     build: .
     volumes:
-      - ./:/usr/workspace  # Монтируем весь проект
+      - ./:/usr/workspace
       - ./allure-results:/usr/workspace/allure-results
       - ./allure-report:/usr/workspace/allure-report
     working_dir: /usr/workspace
