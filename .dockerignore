@@ -1,0 +1,10 @@
+.git/
+.github/
+allure-report/
+allure-results/
+*.log
+*.tmp
+*.pyc
+__pycache__/
+.DS_Store
+.env

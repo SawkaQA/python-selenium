@@ -1,4 +1,4 @@
-name: Tests
+name: Tests CI Pipeline
 
 on: [push]
 
@@ -13,37 +13,50 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout main repository
+        uses: actions/checkout@v4
 
-      - name: Checkout (copy) gh-pages repository to GitHub runner
+      - name: Checkout gh-pages branch
         uses: actions/checkout@v4
         with:
           ref: gh-pages
-          path: ./.github/gh-pages
+          path: gh-pages
+          sparse-checkout: "history"  # Выгружаем только историю
 
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Run UI-tests via docker-compose
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Prepare directories
         run: |
-          docker-compose up --exit-code-from regression || true
+          mkdir -p ${{ env.ALLURE_RESULTS_DIR }}/history
+          [ -d "gh-pages/history" ] && cp -R gh-pages/history/* ${{ env.ALLURE_RESULTS_DIR }}/history/ || echo "No history found"
 
-      - name: Copy history from gh-pages to allure-results
-        run: |
-          sudo mkdir -p allure-results/history  # Создает директорию для истории Allure
-          sudo cp -R ./.github/gh-pages/history/* allure-results/history/
+      - name: Run tests
+        run: docker compose up tests --build --exit-code-from tests --abort-on-container-exit
 
       - name: Generate Allure report
+        if: success() || failure()  # Всегда генерируем отчет
         run: |
-          docker compose run regression /bin/sh -c "allure generate /app/allure-results --clean -o /app/allure-report"
-
-      - name: Update Allure history
-        run: |
-          sudo cp -R allure-report/history/* ./.github/gh-pages/history/
+          if [ -d "${{ env.ALLURE_RESULTS_DIR }}" ]; then
+            docker compose run --no-deps tests allure generate ${{ env.ALLURE_RESULTS_DIR }} --clean -o ${{ env.ALLURE_REPORT_DIR }}
+          else
+            echo "Error: Allure results directory not found!"
+            exit 1
+          fi
 
       - name: Parse test results
-        if: always()
         id: allure-stats
+        if: always()
         run: |
-          sudo apt-get update && sudo apt-get install -y jq
+          apt-get update && apt-get install -y jq
           
           SUMMARY_FILE="${{ env.ALLURE_REPORT_DIR }}/widgets/summary.json"
           [ -f "$SUMMARY_FILE" ] || \
@@ -56,10 +69,6 @@ jobs:
           BROKEN=$(jq -r '.statistic.broken // 0' "$SUMMARY_FILE")
           CANCELED=$(jq -r '.statistic.canceled // 0' "$SUMMARY_FILE")
 
-          calc_percent() {
-            [ $TOTAL -gt 0 ] && echo $(( ($1 * 100) / $TOTAL )) || echo 0
-          }
-
           {
             echo "TOTAL=$TOTAL"
             echo "PASSED=$PASSED"
@@ -67,33 +76,41 @@ jobs:
             echo "SKIPPED=$SKIPPED"
             echo "BROKEN=$BROKEN"
             echo "CANCELED=$CANCELED"
-            echo "PASSED_PERCENT=$(calc_percent $PASSED)"
-            echo "FAILED_PERCENT=$(calc_percent $FAILED)"
-            echo "SKIPPED_PERCENT=$(calc_percent $SKIPPED)"
-            echo "BROKEN_PERCENT=$(calc_percent $BROKEN)"
           } >> $GITHUB_OUTPUT
 
+      - name: Update Allure history
+        if: success() || failure()
+        run: |
+          [ -d "${{ env.ALLURE_REPORT_DIR }}/history" ] && \
+            cp -R ${{ env.ALLURE_REPORT_DIR }}/history/* gh-pages/history/ || \
+            echo "No history to update"
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
-          folder: allure-report
+          folder: ${{ env.ALLURE_REPORT_DIR }}
           clean: true
+          clean-exclude: "history"  # Сохраняем историю
 
       - name: Determine final status
         id: final-status
+        if: always()
         run: |
-          if [ "${{ steps.allure-stats.outputs.FAILED }}" -gt 0 ] || [ "${{ steps.allure-stats.outputs.BROKEN }}" -gt 0 ]; then
+          FAILED=${{ steps.allure-stats.outputs.FAILED || 0 }}
+          BROKEN=${{ steps.allure-stats.outputs.BROKEN || 0 }}
+          
+          if [ "$FAILED" -gt 0 ] || [ "$BROKEN" -gt 0 ]; then
             echo "FINAL_STATUS=❌ ОШИБКИ" >> $GITHUB_OUTPUT
             echo "FINAL_MESSAGE=⚠️ <b>Требуется проверка упавших тестов!</b>" >> $GITHUB_OUTPUT
+            echo "EMOJI=❌" >> $GITHUB_OUTPUT
           else
             echo "FINAL_STATUS=✅ УСПЕШНО" >> $GITHUB_OUTPUT
             echo "FINAL_MESSAGE=🎉 <b>Все тесты прошли успешно!</b>" >> $GITHUB_OUTPUT
+            echo "EMOJI=✅" >> $GITHUB_OUTPUT
           fi
-          # Логируем вывод для отладки
-          echo "FINAL_MESSAGE: ${{ steps.final-status.outputs.FINAL_MESSAGE }}"
+          echo "Status determined: ${{ steps.final-status.outputs.FINAL_STATUS }}"
 
       - name: Send Telegram notification
         if: always()
