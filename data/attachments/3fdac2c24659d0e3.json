@@ -1,0 +1,18 @@
+{
+    "id": 2,
+    "category": {
+        "id": 39,
+        "name": "CATS"
+    },
+    "name": "\u0421\u0442\u043e\u044f\u043d",
+    "photoUrls": [
+        null
+    ],
+    "tags": [
+        {
+            "id": 51,
+            "name": "CATS"
+        }
+    ],
+    "status": "sold"
+}
