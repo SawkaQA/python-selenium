@@ -1,3 +1,5 @@
+import allure
+
 from base.base_page import BasePage
 from links.links import Links
 
@@ -9,5 +11,6 @@ class ProductPage(BasePage):
 
 
     def check_link_elements(self):
-        link = self.elem_is_clickable(self.ELEMENTS_LINK)
-        assert link.text == "Elements", f"Ошибка текста ссылки {link.text}"
+        with allure.step(f"Проверка ссылки для клика"):
+            link = self.elem_is_clickable(self.ELEMENTS_LINK)
+            assert link.text == "Elements", f"Ошибка текста ссылки {link.text}"
